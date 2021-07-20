@@ -22,11 +22,6 @@ defmodule Wheeltater.Core do
     |> Map.new()
   end
 
-  def new_points(points) do
-    points
-    |> rotate_90(@location)
-  end
-
   def rotate_90(points, {a, b} = location) do
     Enum.map(points, fn section ->
       Enum.map(section, fn
@@ -34,6 +29,11 @@ defmodule Wheeltater.Core do
         {x, y} -> {-(y - b) + a, x - a + b}
       end)
     end)
+  end
+
+  def new_points(points) do
+    points
+    |> rotate_90(@location)
   end
 
   # def list_of_immations do
