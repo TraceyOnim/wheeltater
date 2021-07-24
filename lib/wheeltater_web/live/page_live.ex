@@ -4,9 +4,11 @@ defmodule WheeltaterWeb.PageLive do
   use Phoenix.HTML
 
   alias Wheeltater.Core
+  alias Wheeltater.SpinningWheel
 
   @impl true
   def mount(_params, _session, socket) do
+    :timer.send_interval(1000, self(), :spin)
     points = Core.points()
     {:ok, assign(socket, sections_with_color: Core.section_with_color(points))}
   end
@@ -28,14 +30,19 @@ defmodule WheeltaterWeb.PageLive do
   end
 
   def handle_event("spin", _, socket) do
-    points = for {section, _color} <- socket.assigns.sections_with_color, do: section
+    points = for {point, _color} <- socket.assigns.sections_with_color, do: point
 
-    new_points =
-      points
-      |> Core.new_points()
-      |> Core.section_with_color()
+    SpinningWheel.start_wheel(points)
+    |> IO.inspect(label: "))))))))))))))))))))))))))))))")
 
-    {:noreply, socket |> assign(sections_with_color: new_points)}
+    {:noreply, socket}
+  end
+
+  def handle_info(:spin, socket) do
+    {:noreply,
+     assign(socket,
+       sections_with_color: SpinningWheel.wheel_points() |> Core.section_with_color()
+     )}
   end
 
   def svg_head do
